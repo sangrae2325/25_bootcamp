@@ -1,8 +1,8 @@
 package com.example.shop.controller;
 
 import com.example.shop.entity.Product;
-import com.example.shop.repository.ProductRepository;
 import org.springframework.web.bind.annotation.*;
+import com.example.shop.service.ProductService;
 
 import java.util.List;
 
@@ -10,28 +10,27 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductController {
 
-    private final ProductRepository productRepository;
+    private final ProductService productService;
 
-    public ProductController(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public ProductController(ProductService productService) {
+        this.productService = productService;
     }
 
     // 상품 전체 목록 조회
     @GetMapping
     public List<Product> getAllProducts() {
-        return productRepository.findAll();
+        return productService.getAllProducts();
     }
 
     // 상품 상세 조회
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable Integer id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다. id=" + id));
+    public Product getProductById(@PathVariable Long id) {
+        return productService.getProductById(id);
     }
 
     // 상품 등록
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
-        return productRepository.save(product);
+        return productService.createProduct(product);
     }
 }
