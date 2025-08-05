@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "product")
 @Getter
@@ -26,4 +28,8 @@ public class Product {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    private String category;
+
+    private LocalDateTime createdAt;
 }

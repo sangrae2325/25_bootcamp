@@ -1,8 +1,8 @@
 package com.example.shop.controller;
 
 import com.example.shop.entity.Product;
-import org.springframework.web.bind.annotation.*;
 import com.example.shop.service.ProductService;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-    // 상품 전체 목록 조회
+    // 전체 상품 조회
     @GetMapping
     public List<Product> getAllProducts() {
         return productService.getAllProducts();
@@ -32,5 +32,17 @@ public class ProductController {
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
         return productService.createProduct(product);
+    }
+
+    // 검색
+    @GetMapping("/search")
+    public List<Product> searchProducts(@RequestParam String keyword) {
+        return productService.searchProducts(keyword);
+    }
+
+    // 정렬
+    @GetMapping("/sort")
+    public List<Product> sortProducts(@RequestParam String sortBy) {
+        return productService.getProductsSorted(sortBy);
     }
 }
