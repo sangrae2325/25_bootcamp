@@ -20,3 +20,12 @@ export const createProduct = async (
   const res = await axios.post(API_BASE, product);
   return res.data;
 };
+
+// 기존 import, API_BASE, fetchProducts 등은 그대로 유지
+
+export const searchProducts = async (keyword: string): Promise<Product[]> => {
+  const res = await axios.get(`${API_BASE}/search`, {
+    params: { keyword },
+  });
+  return res.data;
+};

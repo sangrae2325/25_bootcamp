@@ -1,18 +1,18 @@
-import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchProducts, createProduct } from "../api/productApi";
-import { Product } from "../types";
-import ProductCard from "../components/ProductCard";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchProducts, createProduct } from "../api/productApi";
+import ProductCard from "../components/ProductCard";
 import ProductForm from "../components/ProductForm";
+import { Product } from "../types";
 
 export default function ProductListPage() {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
 
-  // products 데이터 조회
   const {
-    data: products = [],
+    data: products,
     isLoading,
     isError,
   } = useQuery<Product[], Error>({
@@ -20,7 +20,7 @@ export default function ProductListPage() {
     queryFn: fetchProducts,
   });
 
-  const mutation = useMutation<Product, Error, Omit<Product, "id">>({
+  const mutation = useMutation({
     mutationFn: createProduct,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -33,27 +33,34 @@ export default function ProductListPage() {
     },
   });
 
-  const [showForm, setShowForm] = useState(false);
-
-  const handleCreate = async (newProduct: Omit<Product, "id">) => {
-    await mutation.mutateAsync(newProduct);
+  const handleCreateProduct = async (newProduct: Omit<Product, "id">) => {
+    mutation.mutate(newProduct);
   };
 
   if (isLoading) return <div>로딩 중...</div>;
-  if (isError) return <div>오류가 발생했습니다.</div>;
+  if (isError || !products)
+    return <div>상품 정보를 불러오는 중 오류가 발생했습니다.</div>;
 
   return (
-    <>
-      <div className="flex justify-end p-4">
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-green-600 text-white px-4 py-2 rounded"
-        >
-          상품 등록하기
-        </button>
-      </div>
+    <div style={{ padding: "1rem" }}>
+      <button onClick={() => setShowForm(true)}>상품 등록</button>
 
-      <div className="p-8 grid grid-cols-2 gap-4">
+      {showForm && (
+        <ProductForm
+          onSubmit={handleCreateProduct}
+          onClose={() => setShowForm(false)} // 여기서 onCancel 대신 onClose 사용
+        />
+      )}
+
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "1rem",
+          justifyContent: "center",
+          marginTop: "1rem",
+        }}
+      >
         {products.map((product) => (
           <ProductCard
             key={product.id}
@@ -62,13 +69,6 @@ export default function ProductListPage() {
           />
         ))}
       </div>
-
-      {showForm && (
-        <ProductForm
-          onClose={() => setShowForm(false)}
-          onSubmit={handleCreate}
-        />
-      )}
-    </>
+    </div>
   );
 }
