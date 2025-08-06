@@ -23,9 +23,16 @@ export const createProduct = async (
 
 // 기존 import, API_BASE, fetchProducts 등은 그대로 유지
 
+// 검색
 export const searchProducts = async (keyword: string): Promise<Product[]> => {
-  const res = await axios.get(`${API_BASE}/search`, {
-    params: { keyword },
-  });
+  const res = await axios.get(`${API_BASE}/search`, { params: { keyword } });
+  return res.data;
+};
+
+// 정렬
+export const fetchProductsSorted = async (
+  sortBy: string
+): Promise<Product[]> => {
+  const res = await axios.get(`${API_BASE}/sort`, { params: { sortBy } });
   return res.data;
 };

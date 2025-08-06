@@ -23,8 +23,8 @@ export interface Order {
   id: number;
   userId: number;
   createdAt: string;
-  orderItems: {
-    product: Product;
+  items: {
+    product: { name: string };
     quantity: number;
     price: number;
   }[];

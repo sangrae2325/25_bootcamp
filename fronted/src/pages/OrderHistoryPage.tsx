@@ -25,7 +25,7 @@ export default function OrderHistoryPage() {
           <p>주문번호: {order.id}</p>
           <p>주문일: {new Date(order.createdAt).toLocaleString()}</p>
           <ul>
-            {order.orderItems.map((item, idx) => (
+            {order.items.map((item, idx) => (
               <li key={idx}>
                 {item.product.name} - {item.quantity}개 (
                 {item.price.toLocaleString()}원)
