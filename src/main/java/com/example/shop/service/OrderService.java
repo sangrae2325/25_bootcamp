@@ -7,6 +7,8 @@ import com.example.shop.repository.ProductRepository;
 import com.example.shop.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.shop.exception.OutOfStockException;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,13 +20,16 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     public OrderService(OrderRepository orderRepository,
                         ProductRepository productRepository,
-                        UserRepository userRepository) {
+                        UserRepository userRepository,
+                        KafkaTemplate<String, String> kafkaTemplate) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Transactional
@@ -44,7 +49,7 @@ public class OrderService {
                     .orElseThrow(() -> new RuntimeException("상품 없음: " + itemDto.getProductId()));
 
             if (product.getStock() < itemDto.getQuantity()) {
-                throw new RuntimeException("재고 부족: " + product.getName());
+                throw new OutOfStockException("[" + product.getName() + "] 상품의 재고가 부족합니다. 현재 재고: " + product.getStock());
             }
 
             product.setStock(product.getStock() - itemDto.getQuantity());
@@ -56,12 +61,15 @@ public class OrderService {
             orderItem.setPrice((Long) product.getPrice());
 
             orderItems.add(orderItem);
-
-
         }
 
         order.setItems(orderItems);
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        // Kafka 메시지 보내기
+        kafkaTemplate.send("order-topic", "Order created with ID: " + savedOrder.getId());
+
+        return savedOrder;
     }
 
     public List<Order> getOrdersByUserId(Long userId) {

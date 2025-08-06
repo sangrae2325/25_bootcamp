@@ -2,6 +2,8 @@ package com.example.shop.controller;
 
 import com.example.shop.entity.Product;
 import com.example.shop.service.ProductService;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,9 +32,16 @@ public class ProductController {
 
     // 상품 등록
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
+    public Product createProduct( @RequestBody @Valid Product product, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            // 유효성 오류가 있으면 첫 번째 메시지만 응답으로 반환
+            String errorMessage = bindingResult.getFieldError().getDefaultMessage();
+            throw new IllegalArgumentException("입력 오류: " + errorMessage);
+        }
+
         return productService.createProduct(product);
     }
+
 
     // 검색
     @GetMapping("/search")
