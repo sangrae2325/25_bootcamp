@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createOrder } from "../api/orderApi";
 import { Product } from "../types";
-import "./OrderModal.css"; // 👈 스타일 추가
+import "./OrderModal.css";
 
 interface Props {
   userId: number;
@@ -13,12 +13,20 @@ export default function OrderModal({ userId, product, onClose }: Props) {
   const [quantity, setQuantity] = useState(1);
 
   const handleOrder = async () => {
-    await createOrder({
-      userId,
-      items: [{ productId: product.id, quantity }],
-    });
-    alert("구매 완료!");
-    onClose();
+    try {
+      await createOrder({
+        userId,
+        items: [{ productId: product.id, quantity }],
+      });
+      alert("구매 완료!");
+      onClose();
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.error) {
+        alert(`주문 실패: ${error.response.data.error}`);
+      } else {
+        alert("알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
 
   return (
